@@ -18,25 +18,19 @@ if not API_TOKEN:
     sys.exit(1)
 
 def load_data(file_path):
-    """Load the dataset."""
-    try:
-        # Try reading the file with UTF-8 encoding first
-        data = pd.read_csv(file_path, encoding='utf-8')
-        print(f"Loaded dataset with {data.shape[0]} rows and {data.shape[1]} columns.")
-        return data
-    except UnicodeDecodeError:
-        # If UTF-8 fails, try reading with ISO-8859-1 encoding
-        print("UTF-8 encoding failed, trying ISO-8859-1 encoding.")
+    """Load the dataset, trying multiple encodings."""
+    encodings_to_try = ['utf-8', 'ISO-8859-1', 'latin1', 'cp1252']
+    for encoding in encodings_to_try:
         try:
-            data = pd.read_csv(file_path, encoding='ISO-8859-1')
-            print(f"Loaded dataset with {data.shape[0]} rows and {data.shape[1]} columns.")
+            data = pd.read_csv(file_path, encoding=encoding)
+            print(f"Loaded dataset with {data.shape[0]} rows and {data.shape[1]} columns using {encoding} encoding.")
             return data
+        except UnicodeDecodeError:
+            print(f"Encoding {encoding} failed. Trying the next encoding.")
         except Exception as e:
-            print(f"Error loading data: {e}")
-            sys.exit(1)
-    except Exception as e:
-        print(f"Error loading data: {e}")
-        sys.exit(1)
+            print(f"Error loading data with encoding {encoding}: {e}")
+    print("Failed to load the dataset. Please check the file format and encoding.")
+    sys.exit(1)
 
 def analyze_data(data):
     """Perform a generic analysis on the dataset."""
